@@ -1,0 +1,2382 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client System</title>
+  <link href="../styles/style.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue-router@3.5.1/dist/vue-router.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuex@3.6.2/dist/vuex.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+
+<body>
+  <div id="app">
+    <router-view></router-view>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+  <script>
+
+    const mainApp = {
+      template: `
+        <div class="card">
+          <div class="card-header">
+          <div class="container d-flex flex-row  align-items-center">
+              <div class="container d-flex justify-content-start" style="margin-top: 20px;">
+                <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="pill" type="button" role="tab"
+                    @click="$router.push('/main-app/my-profile')">ПРОФИЛЬ</button>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="pill" type="button" role="tab"
+                    @click="$router.push('/main-app/send-request')">СОЗДАТЬ</button>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="pill" type="button" role="tab"
+                    @click="$router.push('/main-app/equipment')">ОБОРУДОВАНИЕ</button>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="pill" type="button" role="tab"
+                    @click="$router.push('/main-app/materials')">МАТЕРИАЛЫ</button>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="pill" type="button" role="tab"
+                    @click="$router.push('/main-app/advances')">УСЛУГИ</button>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="pill" type="button" role="tab"
+                      @click="$router.push('/main-app/completed-request')">ЗАВЕРШЕННЫЕ</button>
+                  </li>
+                </ul>
+              </div>
+              <div class="d-flex  mt-1 align-items-center justify-content-center" @click="$router.push('/main-app/my-profile')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-person me-2" viewBox="0 0 16 16">
+                  <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
+                </svg>
+                <div class=" h6 fw-light d-flex flex-row justify-content-between mt-2"><div class="me-1">{{dataProfile.firstName}}</div> <div>{{dataProfile.lastName}}</div></div>
+              </div>
+            </div>
+            <div  class="card-body" style="margin-top: 20px;">
+              <router-view></router-view>
+            </div>
+          </div>
+        </div>
+      `,
+      data() {
+        return {
+          dataProfile: [],
+          profile: [],
+        }
+      },
+      methods: {
+        async getProfileInfo() {
+          try {
+
+            // Получаем токен из Vuex store
+            const token = this.$store.getters.token;
+
+            // Используем токен в заголовке запроса
+            const response = await axios.get('http://localhost:7001/profile', {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+            this.profile = response.data;
+            console.log(this.profile)
+            this.getProfile();
+            console.log(response.data); // Вывод результатов в консоль
+          } catch (error) {
+            console.error('Error fetching data:', error);
+          }
+        },
+        async getProfile() {
+          try {
+            let id = this.profile.userId
+
+            const token = this.$store.getters.token;
+
+            const response = await axios.get(`http://localhost:7001/users/${id}`, {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+            this.dataProfile = response.data;
+            console.log(this.dataProfile);
+            console.log(response.data); // Вывод результатов в консоль
+          } catch (error) {
+            console.error('Error f11111etching data:', error);
+          }
+        },
+
+      },
+      created() {
+        this.getProfileInfo();
+      },
+
+    }
+    const loginForm = {
+      template: `    
+            <section class="vh-100 gradient-custom">
+                <div class="container py-5 h-100">
+                    <div class="row d-flex justify-content-center align-items-center h-100">
+                    <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+                        <div class="card bg-dark text-white" style="border-radius: 1rem;">
+                        <div class="card-body p-5 text-center">
+
+                            <div class="mb-md-5 mt-md-4 pb-5">
+
+                            <h2 class="fw-bold mb-2 text-uppercase">Авторизация</h2>
+                            <p class="text-white-50 mb-5">Пожалуйста, введите почту и пароль</p>
+                            <form @submit.prevent="submitForm">
+                                <div class="form-outline form-white mb-4">
+                                    <input type="email" id="typeEmailX" v-model="email" class="form-control form-control-lg" placeholder="электронная почта"/>
+                                </div>
+
+                                <div class="form-outline form-white mb-4">
+                                    <input type="password" id="typePasswordX" v-model="password" class="form-control form-control-lg" placeholder="пароль"/>
+                                </div>
+
+                                <p class="small mb-5 pb-lg-2"><a class="text-white-50" href="#!">Забыли пароль?</a></p>
+
+                                <button class="btn btn-outline-light btn-lg px-5" type="submit">Войти</button>
+                            </form>
+                            <div class="d-flex justify-content-center text-center mt-4 pt-1">
+                                <a href="#!" class="text-white"><i class="fab fa-facebook-f fa-lg"></i></a>
+                                <a href="#!" class="text-white"><i class="fab fa-twitter fa-lg mx-4 px-2"></i></a>
+                                <a href="#!" class="text-white"><i class="fab fa-google fa-lg"></i></a>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </section>
+            `,
+      data() {
+        return {
+          email: '',
+          password: ''
+        };
+      },
+      methods: {
+        async submitForm() {
+          try {
+            const response = await axios.post('http://localhost:7001/auth/login', {
+              email: this.email,
+              password: this.password
+            });
+            // Проверяем, содержит ли ответ токен
+            if (response.data.token) {
+              // Если токен присутствует, сохраняем его в localStorage
+              localStorage.setItem('token', response.data.token);
+              console.log(response.data.token)
+              // Перенаправляем пользователя на основное приложение
+              this.$router.push('/main-app');
+            } else {
+              // Обрабатываем случай, когда токен не возвращается
+              console.error('Токен не найден в ответе сервера');
+            }
+          } catch (error) {
+            // Обработка ошибок
+            alert('Неверный логин или пароль', error);
+          }
+        },
+      }
+    };
+
+    const myProfile = {
+      template: `
+            <div class="container">
+                <div class="row" style="margin-top: 20px;">
+            <div class="col-lg-4">
+              <div class="card mb-4">
+                <div class="card-body text-center">
+                  <h5 class="my-3">{{dataProfile.firstName}} {{dataProfile.lastName}}</h5>
+                  <p class="text-muted mb-1">Дата регистрации</p>
+                  <p class="text-muted mb-4">{{dataProfile.createdAt}}</p>
+                  <!-- <div class="d-flex justify-content-center mb-2">
+                    <button type="button" class="btn btn-primary">Follow</button>
+                    <button type="button" class="btn btn-outline-primary ms-1">Message</button>
+                  </div> -->
+                </div>
+              </div>
+              <div class="card mb-4 mb-lg-0">
+                <div class="card-body p-0">
+                  <ul class="list-group list-group-flush rounded-3">
+                    <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                      <i class="fas fa-globe fa-lg text-warning"></i>
+                      <p class="mb-0"><b>Должность</b></p>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                      <i class="fab fa-github fa-lg" style="color: #333333;"></i>
+                      <p class="mb-0">{{dataProfile.roles[0].description}}</p>
+                    </li>
+                    <li class=" mt-2 list-group-item d-flex justify-content-between align-items-center p-3">
+                      <button type="button" class="btn btn-success">Редактировать профиль</button>
+                    </li>
+                    
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-8">
+              <div class="card mb-4">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-sm-3">
+                      <p class="mb-0"><b>ФИО</b></p>
+                    </div>
+                    <div class="col-sm-9">
+                      <p class="text-muted mb-0">{{dataProfile.firstName}} {{dataProfile.lastName}} {{dataProfile.middleName}}</p>
+                    </div>
+                  </div>
+                  <hr>
+                  <div class="row">
+                    <div class="col-sm-3">
+                      <p class="mb-0"><b>Электронная почта</b></p>
+                    </div>
+                    <div class="col-sm-9">
+                      <p class="text-muted mb-0">{{dataProfile.email}}</p>
+                    </div>
+                  </div>
+                  <hr>
+                  <div class="row">
+                    <div class="col-sm-3">
+                      <p class="mb-0"><b>Номер телефона</b></p>
+                    </div>
+                    <div class="col-sm-9">
+                      <p class="text-muted mb-0">{{dataProfile.phoneNumber}}</p>
+                    </div>
+                  </div>
+                  <hr>
+                  <div class="row">
+                    <div class="col-sm-3">
+                      <p class="mb-0"><b>Дата рождения</b></p>
+                    </div>
+                    <div class="col-sm-9">
+                      <p class="text-muted mb-0">{{dataProfile.birthDate}}</p>
+                    </div>
+                  </div>
+                  <hr>
+                  <div class="row">
+                    <div class="col-sm-3">
+                      <p class="mb-0"><b>Наличие водительских прав</b></p>
+                    </div>
+                    <div class="col-sm-9">
+                      <p class="text-muted mb-0">{{dataProfile.hasDrivingLicense}}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+            </div>
+            
+          </div>
+      </div>
+      </section>
+
+                </div>
+                `,
+      data() {
+        return {
+          dataProfile: [],
+          profile: [],
+        }
+      },
+      methods: {
+        async getProfileInfo() {
+          try {
+
+            // Получаем токен из Vuex store
+            const token = this.$store.getters.token;
+
+            // Используем токен в заголовке запроса
+            const response = await axios.get('http://localhost:7001/profile', {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+            this.profile = response.data;
+            console.log(this.profile)
+            this.getProfile();
+            console.log(response.data); // Вывод результатов в консоль
+          } catch (error) {
+            console.error('Error fetching data:', error);
+          }
+        },
+        async getProfile() {
+          try {
+            let id = this.profile.userId
+
+            const token = this.$store.getters.token;
+
+            const response = await axios.get(`http://localhost:7001/users/${id}`, {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+            this.dataProfile = response.data;
+            console.log(this.dataProfile);
+            console.log(response.data); // Вывод результатов в консоль
+          } catch (error) {
+            console.error('Error fetching data:', error);
+          }
+        },
+
+      },
+      created() {
+        this.getProfileInfo();
+      }
+    };
+
+    const sendRequest = {
+      template: `
+      <div class="container">
+        
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" aria-selected="true">Клиенты</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button" role="tab" aria-controls="profile-tab-pane" aria-selected="false">Заявки</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact-tab-pane" type="button" role="tab" aria-controls="contact-tab-pane" aria-selected="false">Сформировать перечень услуг</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="disabled-tab" data-bs-toggle="tab" data-bs-target="#disabled-tab-pane" type="button" role="tab" aria-controls="disabled-tab-pane" aria-selected="false" disabled>Прочее</button>
+          </li>
+        </ul>
+    <div class="tab-content" id="myTabContent">
+    
+    <div class="tab-pane fade active show" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">
+    
+      <div class="d-flex align-items-center justify-content-between flex-wrap mt-2">
+        <div class="mt-2">
+          <p class="h4 fw-light">Список клиентов</p>
+        </div>
+        <div class="btn-group d-flex justify-content-end" role="group" aria-label="Basic outlined example" style="margin-top: 10px">
+          <div class="me-1">
+            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#physModal">Физическое лицо</button> <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#urModal">Юридическое лицо</button>
+          </div>
+          <div>
+            <form class="d-flex flex-row">
+              <input class="form-control me-1" type="search" v-model="searchQuery" placeholder="Данные о клиенте" aria-label="Search"> <button class="btn btn-outline-success">Искать</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    
+      <div class="accordion mt-3" id="accordionExample">
+        <div class="accordion accordion-flush" id="accordionFlushExample">
+          <div class="accordion-item mt-3" v-for="(item, index) in filteredClients" :key="index">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed d-flex flex-wrap" type="button" data-bs-toggle="collapse" :data-bs-target="'#collapse-' + index" aria-expanded="false" :aria-controls="'collapse-' + index">
+                <div class="d-flex w-100 justify-content-between">
+                  <h5 class="mb-1">
+                    <span v-if="item.clientPhys" class="fw-medium">{{ item.clientPhys.lastName }} {{ item.clientPhys.firstName }} {{ item.clientPhys.middleName }}</span>
+                    <span v-else-if="item.clientUr" class="fw-medium">{{ item.clientUr.name }}</span>
+                  </h5>
+                  <small>{{ item.createdAt }}</small>
+                </div>
+                <small>
+                  <span v-if="item.clientPhys">Физическое лицо</span>
+                  <span v-else-if="item.clientUr">Юридическое лицо</span>
+                  <span v-else>Неизвестен</span>
+                </small>
+              </button>
+            </h2>
+            <div :id="'collapse-' + index" class="accordion-collapse collapse" aria-labelledby="flush-headingThree" data-bs-parent="#accordionFlushExample">
+              <div class="accordion-body">
+                <ul class="list-group">
+                    <li class="list-group-item"><b>ID:</b> {{ item.id }}</li>
+                    <li class="list-group-item" v-if="item.clientPhys"><b>Фамилия:</b> {{ item.clientPhys.lastName || 'Неизвестно' }}</li>
+                    <li class="list-group-item" v-if="item.clientPhys"><b>Имя:</b> {{ item.clientPhys.firstName || 'Неизвестно' }}</li>
+                    <li class="list-group-item" v-if="item.clientPhys"><b>Отчество:</b> {{ item.clientPhys.middleName || 'Неизвестно' }}</li>
+                    <li class="list-group-item" v-if="item.clientPhys"><b>Дата рождения:</b> {{ item.clientPhys.birthDate || 'Неизвестно' }}</li>
+                    <li class="list-group-item" v-if="item.clientPhys"><b>Пол:</b> {{ item.clientPhys.gender || 'Неизвестно' }}</li>
+                    <li class="list-group-item" v-if="item.clientPhys"><b>Телефон:</b> {{ item.clientPhys.phone || 'Неизвестен' }}</li>
+                    <li class="list-group-item" v-if="item.clientPhys"><b>Почтовый индекс:</b> {{ item.clientPhys.postalCode || 'Неизвестно' }}</li>
+                    <li class="list-group-item" v-if="item.clientPhys"><b>Адрес:</b> {{ item.clientPhys.address || 'Неизвестно' }}
+                    <li class="list-group-item" v-if="item.clientPhys"><b>Дата регистрации:</b> {{ item.clientPhys.createdAt || 'Неизвестно' }}
+                    </li><!-- Добавляем информацию для юридического лица -->
+                    <li class="list-group-item" v-if="item.clientUr"><b>Название:</b> {{ item.clientUr.name || 'Неизвестно' }}</li>
+                    <li class="list-group-item" v-if="item.clientUr"><b>ИНН:</b> {{ item.clientUr.inn || 'Неизвестно' }}</li>
+                    <li class="list-group-item" v-if="item.clientUr"><b>Счет:</b> {{ item.clientUr.account || 'Неизвестно' }}</li>
+                    <li class="list-group-item" v-if="item.clientUr"><b>КПП:</b> {{ item.clientUr.kpp || 'Неизвестно' }}</li>
+                    <li class="list-group-item" v-if="item.clientUr"><b>ОКПО:</b> {{ item.clientUr.okpo || 'Неизвестно' }}</li>
+                    <li class="list-group-item" v-if="item.clientUr"><b>ОГРН:</b> {{ item.clientUr.ogrn || 'Неизвестно' }}</li>
+                    <li class="list-group-item" v-if="item.clientUr"><b>Страна регистрации:</b> {{ item.clientUr.countryRegistration || 'Неизвестно' }}</li>
+                    <li class="list-group-item" v-if="item.clientUr"><b>Дата регистрации:</b> {{ item.clientUr.createdAt || 'Неизвестно' }}</li>
+                  </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="modal fade" id="urModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="urModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="urModalLabel">Добавить юридическое лицо</h5>
+              </div>
+              <div class="modal-body">
+                <form @submit.prevent="addClientUr">
+                  <div div="" class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-default">Название</span> <input type="text" v-model="clientUrFace.name" id="name" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                  </div>
+                  <div div="" class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-default">ИНН</span> <input type="text" v-model="clientUrFace.inn" id="inn" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                  </div>
+                  <div div="" class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-default">Счет</span> <input type="text" v-model="clientUrFace.account" id="account" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                  </div>
+                  <div div="" class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-default">Адрес</span> <input type="text" v-model="clientUrFace.address" id="address" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                  </div>
+                  <div div="" class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-default">Телефон</span> <input type="text" v-model="clientUrFace.phone" id="phone" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                  </div>
+                  <div div="" class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-default">КПП</span> <input type="text" v-model="clientUrFace.kpp" id="kpp" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                  </div>
+                  <div div="" class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-default">ОКПО</span> <input type="text" v-model="clientUrFace.okpo" id="okpo" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                  </div>
+                  <div div="" class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-default">ОГРН</span> <input type="text" v-model="clientUrFace.ogrn" id="ogrn" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                  </div>
+                  <div div="" class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-default">Страна регистрации</span> <input type="text" v-model="clientUrFace.countryRegistration" id="countryRegistration" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                  </div>
+                  <div div="" class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-default">Почтовый индекс</span> <input type="text" v-model="clientUrFace.postalCode" id="postalCode" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                  </div>
+                  <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Добавить</button> <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Закрыть</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+    
+        <div class="modal fade" id="physModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="physModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="physModalpLabel">Добавить физическое лицо</h5>
+                </div>
+                <form @submit.prevent="addClientPhys">
+                  <div class="modal-body">
+                    <div div="" class="input-group mb-3">
+                      <span class="input-group-text" id="inputGroup-sizing-default">Фамилия</span> <input type="text" v-model="clientPhysFace.lastName" id="lastName" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                    </div>
+                    <div class="input-group mb-3">
+                      <span class="input-group-text" id="inputGroup-sizing-default">Имя</span> <input type="text" v-model="clientPhysFace.firstName" id="firstName" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                    </div>
+                    <div div="" class="input-group mb-3">
+                      <span class="input-group-text" id="inputGroup-sizing-default">Отчество</span> <input type="text" v-model="clientPhysFace.middleName" id="middleName" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                    </div>
+                    <div class="input-group mb-3">
+                      <span class="input-group-text" id="inputGroup-sizing-default">Дата рождения</span> <input type="text" v-model="clientPhysFace.birthDate" id="birthDate" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                    </div>
+                    <div div="" class="input-group mb-3">
+                      <span class="input-group-text" id="inputGroup-sizing-default">Пол</span> <input type="text" v-model="clientPhysFace.gender" id="gender" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                    </div>
+                    <div class="input-group mb-3">
+                      <span class="input-group-text" id="inputGroup-sizing-default">Телефон</span> <input type="text" v-model="clientPhysFace.phone" id="phone" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                    </div>
+                    <div div="" class="input-group mb-3">
+                      <span class="input-group-text" id="inputGroup-sizing-default">Почтовый индекс</span> <input type="text" v-model="clientPhysFace.postalCode" id="postalCode" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                    </div>
+                    <div class="input-group mb-3">
+                      <span class="input-group-text" id="inputGroup-sizing-default">Адрес</span> <input type="text" v-model="clientPhysFace.address" id="address" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Добавить</button> <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Закрыть</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+    
+    
+    <div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">
+      
+
+
+
+      <div class="d-flex align-items-center justify-content-between flex-wrap mt-2">
+        <div class="mt-2">
+          <p class="h4 fw-light">Список заявок</p>
+        </div>
+        <div class="btn-group d-flex justify-content-end mt-1" role="group" aria-label="Basic outlined example">
+          <div class="btn-group" role="group" aria-label="Basic outlined example">
+            <div class="me-1">
+              <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#newRequestModal">Создать</button>
+            </div>
+            <form class="d-flex flex-row">
+              <input class="form-control me-1" type="search" v-model="searchQueryRequests" placeholder="Данные о заявке" aria-label="Search"> <button class="btn btn-outline-success">Искать</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+
+
+      <div class="accordion mt-3" id="accordionExample">
+        <div class="accordion accordion-flush" id="accordionFlushExample">
+          <div class="accordion-item mt-3" v-for="(item, index) in filteredRequests" :key="index">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" :data-bs-target="'#collapse-' + index" aria-expanded="false" :aria-controls="'collapse-' + index">
+                <div class="d-flex w-100 justify-content-between flex-column">
+                  <h5 class="mb-1">{{item.title}}</h5>
+                  <small>{{ item.date}}</small>
+                </div>
+              </button>
+            </h2>
+            <div :id="'collapse-' + index" class="accordion-collapse collapse" aria-labelledby="flush-headingThree" data-bs-parent="#accordionFlushExample">
+              <div class="accordion-body">
+                <ul class="list-group">
+                  <li class="list-group-item"><b>ID:</b> {{ item.id }}</li>
+                  <li class="list-group-item"><b>Название:</b> {{ item.title || 'Неизвестно' }}</li>
+                  <li class="list-group-item"><b>Описание:</b> {{ item.description || 'Неизвестно' }}</li>
+                  <li class="list-group-item"><b>Дата:</b> {{ item.date || 'Неизвестно' }}</li><!-- Отображение названия или фио клиента в зависимости от типа клиента -->
+                  <li class="list-group-item"><b>Клиент:</b> <span v-if="item.client.clientPhys">{{ item.client.clientPhys.lastName }} {{ item.client.clientPhys.firstName }} {{ item.client.clientPhys.middleName }}</span> <span v-else-if="item.client.clientUr">{{ item.client.clientUr.name }}</span> <span v-else="">Неизвестно</span></li>
+                  <li class="list-group-item"><b>Сотрудник:</b> {{ item.employee.lastName || 'Неизвестно' }} {{ item.employee.firstName || 'Неизвестно' }} {{ item.employee.middleName || 'Неизвестно' }}</li>
+                  <li class="list-group-item"><b>Cтатус:</b> {{ item.status|| 'Неизвестно' }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+
+      <div class="modal fade" id="newRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="newRequestModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="newRequestModalLabel">Добавить новую заявку</h5>
+              </div>
+              <div class="modal-body">
+                <form>
+                  <div div="" class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-default">Название</span> <input type="text" v-model="request.title" id="title" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                  </div>
+                  <div class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-default">Описание</span> <input type="text" v-model="request.description" id="description" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                  </div>
+                  <div class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-default">Дата</span> <input type="text" v-model="request.date" id="date" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                  </div>
+                  <div class="input-group mb-3">
+                    <span class="input-group-text" id="clientId">Клиент</span> <select class="form-select" aria-label="Default select example" v-model="request.clientId">
+                      <option>
+                        Выберите клиента
+                      </option>
+                      <option v-for="item in clients">
+                        {{ item.clientPhys ? item.clientPhys.lastName + ' ' + item.clientPhys.firstName + ' ' + item.clientPhys.middleName : item.clientUr.name }}
+                      </option>
+                    </select>
+                  </div>
+                  <div div="" class="input-group mb-3">
+                    <span class="input-group-text" id="employeeId">Сотрудник</span> <select class="form-select" aria-label="Default select example" v-model="request.employeeId">
+                      <option value="">
+                        Выберите сотрудника
+                      </option>
+                      <option v-for="item in users">
+                        {{ item.lastName + ' ' + item.firstName + ' ' + item.middleName }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Добавить</button> <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Закрыть</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+    
+    </div>
+    
+    
+    
+    
+    <div class="tab-pane fade" id="contact-tab-pane" role="tabpanel" aria-labelledby="contact-tab" tabindex="0">
+     
+      <div> 
+          <div class="mt-2 d-flex flex-col align-items-start justify-content-between flex-wrap"">
+            <div>         
+              <div class="mt-2">   
+                <p class="h4 fw-light">Выберите заявку</p>   
+                <select class="form-select" aria-label="Default select example" v-model="selectedRequestId"
+          @change="getRequestByPk">
+          <option value="" disabled>Open this select menu</option>
+          <option v-for="request in requests" :key="request.id" :value="request.id">
+            {{ request.title }}
+          </option>
+        </select>
+              </div>
+            </div>
+              
+          <div/>
+          <div class="mt-3">
+                <button type="button" v-if="selectedRequestId" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalAddRequltOfAnalysis">Включить результаты анализа</button> 
+                <button type="button" v-if="selectedRequestId" @click="getAdvances" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#completeThisRequest">Завершить и сформировать отчет</button>
+                <button type="button" v-if="selectedRequestId" @click="getAdvances" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalAddProvidedAdvances">Добавить услугу</button>
+          </div>      
+      </div>  
+
+      <div class="mt-3">
+      
+        <p class="h5 fw-light"><b>Оказанные услуги</b></p>
+        
+      </div>
+
+      <div class="mt-3" v-if="selectedRequestId">
+    
+        <div class="mt-3">
+          <h4 class="h5 fw-light"><b>Название заявки</b></h4>
+        </div>
+        <textarea class="form-control" id="exampleFormControlTextarea1" rows="2">{{ selectedRequestByPk.title }}</textarea>
+        <div class="mt-3">
+          <h4 class="h5 fw-light"><b>Описание</b></h4>
+        </div>
+        <div class="form-group">
+          <textarea class="form-control mb-3" id="exampleFormControlTextarea1" rows="6">{{ selectedRequestByPk.description }}</textarea>
+        </div>
+
+        <div class="mt-3">
+          <p class="h5 fw-light"><b>Результаты анализа | Рекомендации</b></p>
+
+          <div class="mt-3" v-if="selectedResulfOfAnalysis && selectedResulfOfAnalysis.recommendations && selectedResulfOfAnalysis.analysisResult">
+            <div>
+              <h5 class="h5 fw-light">Рекомендации:</h5>
+              <p>{{ selectedResulfOfAnalysis.recommendations }}</p>
+            </div>
+            <div>
+              <h5 class="h5 fw-light">Результаты анализа:</h5>
+              <p>{{ selectedResulfOfAnalysis.analysisResult }}</p>
+            </div>
+          </div>
+          <div v-else>
+            <p>Нет выбранного результата анализа.</p>
+          </div>
+        </div>
+
+
+      
+        <div class="mt-3">
+          <p class="h5 fw-light"><b>Оказанные услуги</b></p>  
+        </div>
+
+        <div class="accordion" id="accordionExample">
+          <div class="accordion accordion-flush" id="accordionFlushExample">
+            <div class="accordion-item mt-2" v-for="(item, index) in providedAdvances" :key="index">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" @click="fetchUsedMaterials(item.id)" type="button" data-bs-toggle="collapse" :data-bs-target="'#collapse-' + index" aria-expanded="false" :aria-controls="'collapse-' + index">
+                  {{ item.advances.name }}
+                </button>
+              </h2>
+              <div :id="'collapse-' + index" class="accordion-collapse collapse" aria-labelledby="flush-headingThree" data-bs-parent="#accordionFlushExample">
+                <div class="accordion-body">             
+                  <p class="h5 fw-light"><b>Использованные материалы</b></p>
+                  <table class="table table-secondary table-striped" v-if="item.usedMaterials &amp;&amp; item.usedMaterials.length &gt; 0">
+                    <thead>
+                      <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Название</th>
+                        <th scope="col">Количество</th>
+                        <th scope="col">Цена</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="material in item.usedMaterials">
+                        <th scope="row">{{ material.id }}</th>
+                        <td v-if="material.material">{{ material.material.name }}</td>
+                        <td v-else="">Не определено</td>
+                        <td>{{ material.quantity }}</td>
+                        <td>{{ material.material?.price || 'Не определено' }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div class="mt-2 d-flex flex-row justify-content-around flex-wrap">
+                    
+                      <button type="submit" class="btn btn-outline-primary btn-sm">Добавить материал</button>
+                      <div class="col">                    
+                      <select class="form-select" aria-label="Default select example" v-model="formAddUsedMaterials.idMaterial">
+                        <option value="" disabled>Open this select menu</option>
+                        <option v-for="item in materials" :key="item.id" :value="item.id">
+                          {{ item.name }}
+                        </option>
+                      </select>
+                    </div>
+                    <div class="col">    
+                      <input type="text" placeholder="Количество" v-model="formAddUsedMaterials.quantity" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+                    </div>
+                  </div>
+                  <p v-else="">Использованные материалы отсутствуют</p>
+
+                  <div class="mt-3">
+                    <p class="h5 fw-light"><b>Использованное оборудование</b></p>
+                  </div>
+                  <table class="table table-secondary table-striped" v-if="item.usedEquipment &amp;&amp; item.usedEquipment.length &gt; 0">
+                    <thead>
+                      <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Название</th>
+                        <th scope="col">Количество</th>
+                        <th scope="col">Цена</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="material in item.usedEquipment">
+                        <th scope="row">{{ material.id }}</th>
+                        <td v-if="material.equipment">{{ material.equipment.name }}</td>
+                        <td v-else="">Не определено</td>
+                        <td>{{ material.quantity }}</td>
+                        <td>{{ material.equipment?.price || 'Не определено' }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div class="mt-2 d-flex flex-row justify-content-around flex-wrap">
+                    
+                      <button type="submit" class="btn btn-outline-primary btn-sm">Добавить оборудование</button>
+                      <div class="col">                    
+                        <select class="form-select" aria-label="Default select example" v-model="formAddUsedEquipments.idEquipment">
+                          <option value="" disabled>Open this select menu</option>
+                          <option v-for="item in equipments" :key="item.id" :value="item.id">
+                            {{ item.name }}
+                          </option>
+                        </select>
+                      </div>
+                    <div class="col">    
+                      <input type="text" placeholder="Количество" v-model="formAddUsedEquipments.quantity" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+                    </div>
+                  <p v-else="">Использованное оборудование отсутствует</p>
+
+
+                </div>
+                  <div class="mt-3">
+                    <p class="h5 fw-light"><b>Информация об имеющейся пробе</b></p>
+                  </div>
+                  <table class="table table-success table-striped" v-if="item.probe">
+                    <thead>
+                      <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Название</th>
+                        <th scope="col">Место забора</th>
+                        <th scope="col">Дата забора</th>
+                        <th scope="col">Вес пробы</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <th scope="row">{{ item.probe.id }}</th>
+                        <td>{{ item.probe.title }}</td>
+                        <td>{{ item.probe.location }}</td>
+                        <td>{{ item.probe.date }}</td>
+                        <td>{{ item.probe.weight }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <p v-else="">Отсутствует</p>
+                </div>
+              </div>
+            </div>
+          </div>
+            <div class="mt-3">
+              <h5 class="h5 fw-medium">Итоговая стоимость услуг:</h5> {{ totalCost }}
+            </div>
+        </div>
+
+        <div class="modal fade" id="completeThisRequest" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">Завершение заявки</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <p>Вы действительно хотите завершить заявку и сформировать отчет?</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" v-if="selectedRequestId" class="btn btn-success" @click="completeRequest(selectedRequestId)" data-bs-dismiss="modal">Завершить и сформировать отчет</button>
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Отменить</button> 
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="modal fade" id="modalAddRequltOfAnalysis" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Добавить результаты анализа</h5>
+              </div>
+              <div class="modal-body">
+                <form id="addResultOfAnalysis" @submit.prevent="addResultOfAnalysis">
+                  <div class="mb-3">
+                    <select class="form-select" aria-label="Default select example" v-model="selectedRequestId">
+                      <option value="" disabled>Open this select menu</option>
+                      <option v-for="request in requests" :key="request.id" :value="request.id">
+                        {{ request.title }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="recommendations" class="form-label">Рекоммендации</label>
+                    <textarea class="form-control" v-model="formAddResultOfAnalysis.recommendations" id="recommendations" rows="3"></textarea>
+                  </div>
+                  <div class="mb-3">
+                    <label for="analysisResult" class="form-label">Результаты анализов</label>
+                    <textarea class="form-control" v-model="formAddResultOfAnalysis.resultOfAnalysis" id="analysisResult" rows="3"></textarea>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="submit" class="btn btn-primary" id="submitButton">Сохранить</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+
+
+      
+        <div class="modal fade" id="modalAddProvidedAdvances" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Добавить услугу</h5>
+              </div>
+              <div class="modal-body">
+                <form @submit.prevent="addProvidedAdvances">
+                  <div class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-default">Услуга</span> 
+                    <select class="form-select" aria-label="Default select example" v-model="formAddProvidedAdvances.idAdvances">
+                      <option value="" disabled>
+                        Open this select menu
+                      </option>
+                      <option v-for="item in advances">
+                        {{ item.name }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-default">Дата</span> <input type="text" class="form-control" placeholder="Дата оказания услуги" v-model="formAddProvidedAdvances.date">
+                  </div>
+                  <div class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-default">Исполнитель</span> 
+                    <select class="form-select" aria-label="Default select example" v-model="formAddProvidedAdvances.idEmployee">
+                      <option value="" disabled>
+                        Open this select menu
+                      </option>
+                      <option v-for="item in users">
+                        {{ item.lastName }} {{ item.firstName }} {{ item.middleName }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-default">Заявка</span> <select class="form-select" aria-label="Default select example" v-model="selectedRequestId">
+                      <option value="" disabled>
+                        Open this select menu
+                      </option>
+                      <option v-for="request in requests" :key="request.id" :value="request.id">
+                        {{ request.title }}
+                      </option>
+                    </select>
+                  </div>
+                  <div>
+                    <div>
+                      <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" v-model="checkboxValue"> <label class="form-check-label" for="flexSwitchCheckChecked">Добавить пробу</label>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-if="checkboxValue">
+                    <input type="text" v-model="formProbe.title" class="form-control mb-2" placeholder="Название"> <input type="text" v-model="formProbe.date" class="form-control mb-2" placeholder="Дата забора"> <input type="text" v-model="formProbe.location" class="form-control mb-2" placeholder="Место забора"> <input type="number" v-model="formProbe.weight" class="form-control mb-2" placeholder="Вес">
+                    <div class="input-group mb-3">
+                      <span class="input-group-text" id="inputGroup-sizing-default">Исполнитель</span> <select class="form-select" aria-label="Default select example" v-model="formAddProvidedAdvances.idEmployee">
+                        <option value="" disabled>
+                          Open this select menu
+                        </option>
+                        <option v-for="item in users">
+                          {{ item.lastName }} {{ item.firstName }} {{ item.middleName }}
+                        </option>
+                      </select>
+                    </div>
+                    <div class="input-group mb-3">
+                      <span class="input-group-text" id="inputGroup-sizing-default">Заявка</span> 
+                      <select class="form-select" aria-label="Default select example" v-model="selectedRequestId">
+                        <option value="" disabled>
+                          Open this select menu
+                        </option>
+                        <option v-for="request in requests" :key="request.id" :value="request.id">
+                          {{ request.title }}
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Отправить</button> <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+      </div>
+
+      
+
+      
+    
+    </div>
+    
+      
+    </div>
+  </div>
+</div>
+`
+      ,
+      data() {
+        return {
+
+          formAddUsedEquipments: {
+            idEquipment: null,
+            idProvidedAdvances: null,
+            quantity: null
+          },
+
+          formAddUsedMaterials: {
+            idMaterial: null,
+            idProvidedAdvances: null,
+            quantity: null
+          },
+          request: {
+            title: null,
+            description: null,
+            date: null,
+            clientId: null,
+            employeeId: null
+          },
+
+          clientPhysFace: {
+            lastName: null,
+            firstName: null,
+            middleName: null,
+            birthDate: null,
+            gender: null,
+            phone: null,
+            postalCode: null,
+            address: null
+          },
+
+          clientUrFace: {
+            id: null,
+            name: null,
+            inn: null,
+            account: null,
+            address: null,
+            phone: null,
+            kpp: null,
+            okpo: null,
+            ogrn: null,
+            countryRegistration: null,
+            postalCode: null,
+            createdAt: null,
+            updatedAt: null,
+          },
+
+          users: [],
+          requests: [],
+          clientsUr: [],
+          clients: [],
+          filteredClients: [],
+          filteredRequests: [],
+          providedAdvances: [],
+          advances: [],
+          materials: [],
+          equipments: [],
+
+          usedMaterials: [],
+          usedEquipment: [],
+
+          selectedRequestId: null,
+          selectedRequestByPk: null,
+
+          idProvidedAdvances: null,
+
+          checkboxValue: true,
+
+          searchQuery: '',
+          searchQueryRequests: '',
+
+
+          formAddProvidedAdvances: {
+            idAdvances: null,
+            date: '',
+            requestId: null,
+            idEmployee: null
+          },
+
+          formProbe: {
+            title: '',
+            date: '',
+            location: '',
+            weight: '',
+          },
+          formAddResultOfAnalysis:{
+            recommendations: '',
+            resultOfAnalysis: '',
+          },
+
+          selectedResulfOfAnalysis: [],
+
+        }
+      },
+      methods: {
+        async getResultOfAnalysis(requestId) {
+          await axios.get(`http://localhost:7001/result-of-analysis/request/${requestId}`)
+            .then(response => {
+              // Обработка успешного ответа
+              this.selectedResulfOfAnalysis = response.data;
+              console.log('Полученные данные об результатах анализа и рекоммендациях:', this.selectedResulfOfAnalysis);
+            })
+            .catch(error => {
+              // Обработка ошибки
+              console.error('Ошибка при получении данных об результатах анализа и рекоммендациях:', error);
+            });
+        },
+        addResultOfAnalysis(){
+          const resultOfAnalysisData = {
+            requestId: this.selectedRequestId,
+            recommendations: this.formAddResultOfAnalysis.recommendations,           
+            analysisResult: this.formAddResultOfAnalysis.resultOfAnalysis,
+          };
+
+          return axios.post('http://localhost:7001/result-of-analysis', resultOfAnalysisData) // Возвращаем промис
+            .then(response => {
+              console.log('Результаты анализа успешно добавлены:', response.data);
+            })
+            .catch(error => {
+              console.error('Ошибка при добавлении результатов анализа:', error);
+            });
+        },
+        async getEquipments() {
+          await axios.get('http://localhost:7001/equipment')
+            .then(response => {
+              // Обработка успешного ответа
+              this.equipments = response.data;
+              console.log('Полученные данные об материалах:', this.equipments);
+            })
+            .catch(error => {
+              // Обработка ошибки
+              console.error('Ошибка при получении данных об материалах:', error);
+            });
+        },
+        getMaterials() {
+          axios.get('http://localhost:7001/materials')
+            .then(response => {
+              // Обработка успешного ответа
+              this.materials = response.data;
+              console.log('Полученные данные об материалах:', this.materials);
+            })
+            .catch(error => {
+              // Обработка ошибки
+              console.error('Ошибка при получении данных об материалах:', error);
+            });
+        },
+        async completeRequest(selectedRequestId) {
+          try {
+            const response = await axios.put(`http://localhost:7001/requests/${this.selectedRequestId}/complete`);
+            console.log('Заявка завершена', response.data);
+            // Обработка успешного ответа
+          } catch (error) {
+            console.error('Ошибка при завершении заявки:', error);
+            // Обработка ошибки
+          }
+        },
+        async fetchUsedMaterials(idProvidedAdvances) {
+          try {
+            this.fetchUsedEquipment(idProvidedAdvances);
+            const token = this.$store.getters.token;
+            const response = await axios.get(`http://localhost:7001/provided-advances/${idProvidedAdvances}/used-materials`, {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+
+            // Найдите элемент в providedAdvances, который нужно обновить
+            const providedAdvance = this.providedAdvances.find(advance => advance.id === idProvidedAdvances);
+            if (providedAdvance) {
+              // Сохраните полученные данные в элементе providedAdvance
+              providedAdvance.usedMaterials = response.data;
+            }
+          } catch (error) {
+            console.error('Error fetching data of materials:', error);
+          }
+        },
+        async fetchUsedEquipment(idProvidedAdvances) {
+          try {
+            const token = this.$store.getters.token;
+            const response = await axios.get(`http://localhost:7001/provided-advances/${idProvidedAdvances}/used-equipments`, {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+
+            // Найдите элемент в providedAdvances, который нужно обновить
+            const providedAdvance = this.providedAdvances.find(advance => advance.id === idProvidedAdvances);
+            if (providedAdvance) {
+              // Сохраните полученные данные в элементе providedAdvance
+              providedAdvance.usedEquipment = response.data;
+            }
+          } catch (error) {
+            console.error('Error fetching data of equipments:', error);
+          }
+        },
+
+        // async fetchUsedEquipment(idProvidedAdvances) {
+        //   try {
+        //     const token = this.$store.getters.token;
+        //     const response2 = await axios.get(`http://localhost:7001/provided-advances/${idProvidedAdvances}/used-equipments`, {
+        //       headers: {
+        //         Authorization: `Bearer ${token}`
+        //       }
+        //     });
+
+        //     // // Проверяем, есть ли в массиве usedEquipment данные
+        //     // if (this.usedEquipment.length > 0) {
+        //     //   // Очищаем массив usedEquipment, если он не пустой
+        //     //   this.usedEquipment = [];
+        //     // }
+
+        //     this.usedEquipment.push(...response2.data);
+
+        //     console.log('использованное 111111 оборудование', this.usedEquipment);
+        //   } catch (error) {
+        //     console.error('Ошибка при получении использованного оборудования:', error);
+        //   }
+        // },
+        async getAdvances() {
+          axios.get('http://localhost:7001/advances')
+            .then(response => {
+              // Обработка успешного ответа
+              this.advances = response.data;
+            })
+            .catch(error => {
+              // Обработка ошибки
+              console.error('Ошибка при получении данных об услугах:', error);
+            });
+        },
+        addProbe() {
+          const probeData = {
+            title: this.formProbe.title,
+            date: this.formProbe.date,
+            location: this.formProbe.location,
+            weight: this.formProbe.weight,
+            employeeId: this.formAddProvidedAdvances.idEmployee,
+            requestId: this.selectedRequestId,
+          };
+
+          return axios.post('http://localhost:7001/probes', probeData) // Возвращаем промис
+            .then(response => {
+              console.log('Проба успешно добавлена:', response.data);
+              return response.data.id; // Предполагается, что ответ содержит идентификатор созданной пробы
+            })
+            .catch(error => {
+              console.error('Ошибка при добавлении пробы:', error);
+            });
+        },
+        addProvidedAdvances(idProbe) {
+          const providedAdvancesData = {
+            idAdvances: this.formAddProvidedAdvances.idAdvances,
+            date: this.formAddProvidedAdvances.date,
+            requestId: this.selectedRequestId,
+            idEmployee: this.formAddProvidedAdvances.idEmployee,
+            idProbe: idProbe, // Идентификатор пробы
+          };
+
+          axios.post('http://localhost:7001/provided-advances', providedAdvancesData)
+            .then(response => {
+              console.log('Оказанная услуга успешно добавлена:', response.data);
+              this.getRequestByPk();
+              // Обновление списка оборудования после добавления нового элемента
+            })
+            .catch(error => {
+              console.error('Ошибка при добавлении оказанной услуги:', error);
+            });
+        },
+        submitBothForms() {
+          if (this.checkboxValue) {
+            this.addProbe()
+              .then(probeId => {
+                this.addProvidedAdvances(probeId);
+              })
+              .catch(error => {
+                console.error('Ошибка при добавлении пробы:', error);
+              });
+          } else {
+            this.addProvidedAdvances(null);
+          }
+        },
+        async getRequestByPk() {
+          if (this.selectedRequestId) {
+            try {
+              const token = this.$store.getters.token;
+
+              const response = await axios.get(`http://localhost:7001/requests/${this.selectedRequestId}`, {
+                headers: {
+                  Authorization: `Bearer ${token}`
+                }
+              });
+              this.selectedRequestByPk = response.data;
+
+              const providedAdvancesResponse = await axios.get(`http://localhost:7001/requests/${this.selectedRequestId}/provided-advances`, {
+                headers: {
+                  Authorization: `Bearer ${token}`
+                }
+              });
+              this.providedAdvances = providedAdvancesResponse.data;
+              this.getResultOfAnalysis(this.selectedRequestId);
+
+              console.log('тут должны быть айди услуг', this.providedAdvances)
+              // const promises = this.providedAdvances.map(providedAdvance => {
+              //   // Добавляем fetchUsedMaterials и fetchUsedEquipment в один массив
+              //   return Promise.all([
+              //     this.fetchUsedMaterials(providedAdvance.id),
+              //     this.fetchUsedEquipment(providedAdvance.id)
+              //   ]);
+              // });
+              // // Ожидаем выполнение всех промисов
+              // await Promise.all(promises);
+
+            } catch (error) {
+              console.error('Ошибка при получении заявки:', error);
+            }
+          }
+        },
+        searchClients() {
+          if (this.searchQuery === '') {
+            this.filteredClients = this.clients;
+          } else {
+            const searchTerm = this.searchQuery.toLowerCase();
+            this.filteredClients = this.clients.filter(client => {
+              // Проверяем, есть ли поле clientUr, чтобы определить, является ли клиент юридическим лицом
+              if (client.clientUr) {
+                // Поиск по названию юридического лица
+                return client.clientUr.name.toLowerCase().includes(searchTerm);
+              } else if (client.clientPhys) {
+                // Поиск по фио физического лица
+                const fullName = `${client.clientPhys.lastName} ${client.clientPhys.firstName} ${client.clientPhys.middleName}`.toLowerCase();
+                return fullName.includes(searchTerm);
+              }
+              // Если нет полей для определения типа клиента, возвращаем false
+              return false;
+            });
+          }
+        },
+        async getClients() {
+          try {
+
+            // Получаем токен из Vuex store
+            const token = this.$store.getters.token;
+
+            // Используем токен в заголовке запроса
+            const response = await axios.get('http://localhost:7001/clients', {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+            this.filteredClients = response.data;
+            console.log(this.clients)
+          } catch (error) {
+            console.error('Error fetching data:', error);
+          }
+        },
+        searchRequests() {
+          const searchTerm = this.searchQueryRequests.toLowerCase();
+          this.filteredRequests = this.requests.filter(request => {
+            // Проверка на undefined и вызов toLowerCase() для title
+            const titleMatches = request.title && request.title.toLowerCase().includes(searchTerm);
+            return titleMatches;
+          });
+        },
+        async getRequests() {
+          try {
+            // Получаем токен из Vuex store
+            const token = this.$store.getters.token;
+
+            // Используем токен в заголовке запроса
+            const response = await axios.get('http://localhost:7001/requests', {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+            this.requests = response.data;
+            this.filteredRequests = this.requests;
+
+            // Проходим по каждой заявке и отправляем запрос к clients/${id}
+            for (const request of this.requests) {
+              let clientId = request.clientId; // Получаем id клиента из заявки
+              if (clientId) {
+                const clientResponse = await axios.get(`http://localhost:7001/clients/${clientId}`, {
+                  headers: {
+                    Authorization: `Bearer ${token}`
+                  }
+                });
+                request.client = clientResponse.data; // Добавляем информацию о клиенте в объект заявки
+              }
+            }
+            console.log(this.requests)
+          } catch (error) {
+            console.error('Error fetching data:', error);
+          }
+        },
+        addClientPhys() {
+          const clientPhysData = {
+            lastName: this.clientPhysFace.lastName,
+            firstName: this.clientPhysFace.firstName,
+            middleName: this.clientPhysFace.middleName,
+            birthDate: this.clientPhysFace.birthDate,
+            gender: this.clientPhysFace.gender,
+            phone: this.clientPhysFace.phone,
+            postalCode: this.clientPhysFace.postalCode,
+            address: this.clientPhysFace.address
+          };
+
+          axios.post('http://localhost:7001/client-phys', clientPhysData)
+            .then(response => {
+              // Обработка успешного ответа
+              alert('Физический клиент успешно добавлен');
+              // Обновление списка оборудования после добавления нового элемента
+              this.getClients();
+
+              // Отправка данных о клиенте на сервер
+              const clientData = {
+                idClientUr: null, // Предполагается, что у нового физического клиента нет юридического лица
+                idClientPhys: response.data.id // Идентификатор физического лица из ответа
+              };
+
+              return axios.post('http://localhost:7001/clients', clientData);
+            })
+            .then(response => {
+              // Обработка успешного ответа от второго запроса
+              alert('Данные о клиенте успешно добавлены');
+              // Выполнение дополнительных действий после добавления клиента
+            })
+            .catch(error => {
+              // Обработка ошибки
+              console.error('Ошибка при добавлении клиента:', error);
+            });
+        },
+        addRequest() {
+          const data = {
+            title: this.request.title,
+            description: this.request.description,
+            date: this.request.date,
+            clientId: this.request.clientId,
+            employeeId: this.request.employeeId
+          };
+
+
+          axios.post('http://localhost:7001/requests', data)
+            .then(response => {
+              this.getRequests();
+
+              var toastLiveExample = document.getElementById('liveToast')
+              if (toastLiveExample) {
+                var toast = new bootstrap.Toast(toastLiveExample)
+                toast.show()
+              }
+            })
+            .catch(error => {
+              // Обработка ошибки
+              console.error('Ошибка при добавлении клиента:', error);
+            });
+        },
+
+        addClientUr() {
+          const clientUrData = {
+            id: this.clientUrFace.id,
+            name: this.clientUrFace.name,
+            inn: this.clientUrFace.inn,
+            account: this.clientUrFace.account,
+            address: this.clientUrFace.address,
+            phone: this.clientUrFace.phone,
+            kpp: this.clientUrFace.kpp,
+            okpo: this.clientUrFace.okpo,
+            ogrn: this.clientUrFace.ogrn,
+            countryRegistration: this.clientUrFace.countryRegistration,
+            postalCode: this.clientUrFace.postalCode,
+          };
+
+          axios.post('http://localhost:7001/client-ur', clientUrData)
+            .then(response => {
+              // Обработка успешного ответа
+              alert('Клиент успешно добавлен');
+              // Обновление списка оборудования после добавления нового элемента
+              this.getClients();
+              // Отправка данных о клиенте на сервер
+              const clientData = {
+                idClientUr: response.data.id, // Идентификатор юридического лица из ответа
+                idClientPhys: null // Предполагается, что у нового клиента нет физического лица
+              };
+
+              return axios.post('http://localhost:7001/clients', clientData);
+            })
+            .then(response => {
+              // Обработка успешного ответа от второго запроса
+              alert('Данные о клиенте успешно добавлены');
+              // Выполнение дополнительных действий после добавления клиента
+            })
+            .catch(error => {
+              // Обработка ошибки
+              console.error('Ошибка при добавлении клиента:', error);
+            });
+        },
+
+        async getUsers() {
+          try {
+
+            // Получаем токен из Vuex store
+            const token = this.$store.getters.token;
+
+            // Используем токен в заголовке запроса
+            const response = await axios.get('http://localhost:7001/users', {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+            this.users = response.data;
+            this.getClients();
+          } catch (error) {
+            console.error('Error fetching data:', error);
+          }
+        },
+        async getClients() {
+          try {
+
+            // Получаем токен из Vuex store
+            const token = this.$store.getters.token;
+
+            // Используем токен в заголовке запроса
+            const response = await axios.get('http://localhost:7001/clients', {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+            this.clients = response.data;
+          } catch (error) {
+            console.error('Error fetching data:', error);
+          }
+        },
+      },
+
+      watch: {
+        // Следим за изменениями searchQueryRequests и вызываем searchRequests при каждом изменении
+        searchQueryRequests: {
+          handler(newValue) {
+            this.searchRequests();
+          },
+          immediate: true // Выполнить поиск сразу при загрузке компонента
+        },
+        searchQuery: {
+          handler(newValue) {
+            this.searchClients();
+          },
+          immediate: true // Выполнить поиск сразу при загрузке компонента
+        }
+      },
+      async created() {
+        await this.getClients();
+        this.filteredClients = this.clients;
+        this.getRequests();
+        this.getUsers();
+        this.getMaterials();
+        this.getEquipments();
+      },
+
+      computed: {
+        totalCost() {
+          return this.providedAdvances.reduce((total, item) => {
+            const price = parseFloat(item.advances.price);
+            return isNaN(price) ? total : total + price;
+          }, 0).toFixed(2);
+        }
+      },
+      destroyed() {
+        // Очищаем массивы после уничтожения компонента
+        this.UsedMaterials = [];
+        this.UsedEquipment = [];
+      },
+    };
+
+    const completedRequest = {
+      template: `
+      <div class="container">
+
+      <div class="d-flex align-items-center justify-content-between flex-wrap mt-2">
+        <div class="mt-2">
+          <p class="h4 fw-light">Выберите заявку</p>
+        </div>
+        <div class="btn-group d-flex justify-content-end" role="group" aria-label="Basic outlined example"
+          style="margin-top: 10px">
+          <div class="me-1">
+          </div>
+
+          <div>
+
+          </div>
+        </div>
+      </div>
+      <div class="mt-3">
+        <select class="form-select" aria-label="Default select example" v-model="selectedRequestId"
+          @change="getRequestByPk">
+          <option value="" disabled>Open this select menu</option>
+          <option v-for="request in requests" :key="request.id" :value="request.id" v-if="request.status === 'Завершен'">
+            {{ request.title }}
+          </option>
+        </select>
+
+        <div class="container mt-5" v-if="selectedRequestByPk">
+        <h2 class="h2 fw-medium text-center mb-4">Отчет по завершенной заявке №: {{selectedRequestByPk.id}}</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <h4 class="h4 fw-light">Информация о клиенте</h4>
+                <p><strong>Клиент:</strong>
+                  
+                  <span v-if="selectedRequestByPk.client.clientPhys" class="fw-bold">{{ selectedRequestByPk.client.clientPhys.lastName }} {{ selectedRequestByPk.client.clientPhys.firstName
+                }} {{ selectedRequestByPk.client.clientPhys.middleName }}</span>
+              <span class="fw-bold" v-else-if="selectedRequestByPk.client.clientUr">{{ selectedRequestByPk.client.clientUr.name }}</span>
+                  </p>
+                <p><strong>ФИО Сотрудника:</strong> <span id="employee-name">{{selectedRequestByPk.employee.lastName}} {{selectedRequestByPk.employee.firstName}} {{selectedRequestByPk.employee.middleName}}</span></p>
+            </div>
+            <div class="col-md-6">
+                <h4 class="h4 fw-light">Информация о заявке</h4>
+                <p><strong>Название заявки:</strong> <span id="request-name">{{selectedRequestByPk.title}}</span></p>
+                <p><strong>Описание заявки:</strong> <span id="request-description">{{selectedRequestByPk.description}}</span></p>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h4 class="h4 fw-light">Список услуг</h4>
+                <ul id="services-list">
+                    <li v-for="item in providedAdvances" :key="item.id" @click="fetchUsedMaterials(item.id)">{{ item.advances.name }}</li>
+                </ul>
+            </div>
+            <div class="col-md-6" >
+                <h4 class="h4 fw-light">Использованное оборудование</h4>
+                <ul id="materials-list">
+                    <li>Пробирки для сбора почвенных образцов</li>
+                    <li>Пеномешалка для измерения pH-уровня</li>
+                    <li>Реактивы для анализа содержания органических веществ</li>
+                    <li>Комплекты для анализа текстуры почвы</li>
+                    <li>Комплекты для анализа водопроницаемости и выдержки почвы</li>
+                </ul>
+                <h4 class="h4 fw-light">Использованные материалы</h4>
+                <ul id="materials-list">
+                    <li>Магнитометр</li>
+                    <li>Спектрофотометр</li>
+                    <li>Водопроницаемостный колонн</li>
+                    <li>Термостат</li>
+                    <li>Электронные весы</li>
+                </ul>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <h4 class="h4 fw-light">Результаты анализа почвы</h4>
+                <p id="soil-analysis-results">{{resultOfAnalysis.analysisResult || 'Неизвестно'}}</p>
+                <h4 class="h4 fw-light">Рекомендации</h4>
+                <p id="recommendations">{{resultOfAnalysis.recommendations || 'Неизвестно'}}</p>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h4 class="h4 fw-light">Дополнительная информация</h4>
+                <p><strong>Вес образца:</strong> <span id="sample-weight">10 кг</span></p>
+                <p><strong>Место извлечения:</strong> <span id="sample-location">Город, Улица, Дом</span></p>
+            </div>
+        </div>
+    </div>
+        
+</div>
+`
+      ,
+      data() {
+        return {
+
+
+          request: {
+            title: null,
+            description: null,
+            date: null,
+            clientId: null,
+            employeeId: null
+          },
+
+          clientPhysFace: {
+            lastName: null,
+            firstName: null,
+            middleName: null,
+            birthDate: null,
+            gender: null,
+            phone: null,
+            postalCode: null,
+            address: null
+          },
+
+          clientUrFace: {
+            id: null,
+            name: null,
+            inn: null,
+            account: null,
+            address: null,
+            phone: null,
+            kpp: null,
+            okpo: null,
+            ogrn: null,
+            countryRegistration: null,
+            postalCode: null,
+            createdAt: null,
+            updatedAt: null,
+          },
+
+          users: [],
+          requests: [],
+          clientsUr: [],
+          clients: [],
+          filteredClients: [],
+          filteredRequests: [],
+          providedAdvances: [],
+          advances: [],
+
+          usedMaterials: [],
+          usedEquipment: [],
+
+          selectedRequestId: null,
+          selectedRequestByPk: null,
+
+          idProvidedAdvances: null,
+
+          checkboxValue: true,
+
+          searchQuery: '',
+          searchQueryRequests: '',
+
+
+          formAddProvidedAdvances: {
+            idAdvances: null,
+            date: '',
+            requestId: null,
+            idEmployee: null
+          },
+
+          formProbe: {
+            title: '',
+            date: '',
+            location: '',
+            weight: '',
+          },
+
+          resultOfAnalysis: [],
+
+
+        }
+      },
+      methods: {
+        getResultOfAnalysis(requestId) {
+  axios.get(`http://localhost:7001/result-of-analysis/request/${requestId}`)
+    .then(response => {
+      // Обработка успешного ответа
+      this.resultOfAnalysis = response.data;
+      console.log('Полученные данные о результатах анализа заявки:', this.resultOfAnalysis);
+    })
+    .catch(error => {
+      // Обработка ошибки
+      if (error.response && error.response.status === 404) {
+        console.error('Результат анализа для заявки не найден:', error);
+        this.resultOfAnalysis = null; // или какое-то другое значение, которое означает "не найдено"
+      } else {
+        console.error('Ошибка при получении данных о результатах анализа заявки:', error);
+      }
+    });
+},
+        getMaterials() {
+          axios.get('http://localhost:7001/materials')
+            .then(response => {
+              // Обработка успешного ответа
+              this.materials = response.data;
+              console.log('Полученные данные об материалах:', this.materials);
+            })
+            .catch(error => {
+              // Обработка ошибки
+              console.error('Ошибка при получении данных об материалах:', error);
+            });
+        },
+        async fetchUsedMaterials(idProvidedAdvances) {
+          try {
+            this.fetchUsedEquipment(idProvidedAdvances);
+            const token = this.$store.getters.token;
+            const response = await axios.get(`http://localhost:7001/provided-advances/${idProvidedAdvances}/used-materials`, {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+
+            // Найдите элемент в providedAdvances, который нужно обновить
+            const providedAdvance = this.providedAdvances.find(advance => advance.id === idProvidedAdvances);
+            if (providedAdvance) {
+              // Сохраните полученные данные в элементе providedAdvance
+              providedAdvance.usedMaterials = response.data;
+            }
+          } catch (error) {
+            console.error('Error fetching data of materials:', error);
+          }
+        },
+        async fetchUsedEquipment(idProvidedAdvances) {
+          try {
+            const token = this.$store.getters.token;
+            const response = await axios.get(`http://localhost:7001/provided-advances/${idProvidedAdvances}/used-equipments`, {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+
+            // Найдите элемент в providedAdvances, который нужно обновить
+            const providedAdvance = this.providedAdvances.find(advance => advance.id === idProvidedAdvances);
+            if (providedAdvance) {
+              // Сохраните полученные данные в элементе providedAdvance
+              providedAdvance.usedEquipment = response.data;
+            }
+          } catch (error) {
+            console.error('Error fetching data of equipments:', error);
+          }
+        },
+
+        async getAdvances() {
+          axios.get('http://localhost:7001/advances')
+            .then(response => {
+              // Обработка успешного ответа
+              this.advances = response.data;
+            })
+            .catch(error => {
+              // Обработка ошибки
+              console.error('Ошибка при получении данных об услугах:', error);
+            });
+        },
+        async getRequestByPk() {
+  if (this.selectedRequestId) {
+    try {
+      const token = this.$store.getters.token;
+
+      const response = await axios.get(`http://localhost:7001/requests/${this.selectedRequestId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      this.selectedRequestByPk = response.data;
+
+      const clientId = this.selectedRequestByPk.clientId;
+
+      // Запрос на получение информации о клиенте
+      const clientResponse = await axios.get(`http://localhost:7001/clients/${clientId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      this.selectedRequestByPk.client = clientResponse.data;
+      console.log('выбранная заявка', this.selectedRequestByPk)
+
+      const providedAdvancesResponse = await axios.get(`http://localhost:7001/requests/${this.selectedRequestId}/provided-advances`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      this.providedAdvances = providedAdvancesResponse.data;
+      this.getResultOfAnalysis(this.selectedRequestId); // Передача id заявки в функцию getResultOfAnalysis
+      console.log("запрос на результаты отправлен")
+
+      console.log('тут должны быть айди услуг', this.providedAdvances)
+      // const promises = this.providedAdvances.map(providedAdvance => {
+      //   // Добавляем fetchUsedMaterials и fetchUsedEquipment в один массив
+      //   return Promise.all([
+      //     this.fetchUsedMaterials(providedAdvance.id),
+      //     this.fetchUsedEquipment(providedAdvance.id)
+      //   ]);
+      // });
+      // // Ожидаем выполнение всех промисов
+      // await Promise.all(promises);
+
+    } catch (error) {
+      console.error('Ошибка при получении заявки:', error);
+    }
+  }
+},
+
+        async getClients() {
+          try {
+
+            // Получаем токен из Vuex store
+            const token = this.$store.getters.token;
+
+            // Используем токен в заголовке запроса
+            const response = await axios.get('http://localhost:7001/clients', {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+            this.filteredClients = response.data;
+            console.log(this.clients)
+          } catch (error) {
+            console.error('Error fetching data:', error);
+          }
+        },
+        async getRequests() {
+          try {
+            // Получаем токен из Vuex store
+            const token = this.$store.getters.token;
+
+            // Используем токен в заголовке запроса
+            const response = await axios.get('http://localhost:7001/requests', {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+            this.requests = response.data;
+            this.filteredRequests = this.requests;
+
+            // Проходим по каждой заявке и отправляем запрос к clients/${id}
+            for (const request of this.requests) {
+              let clientId = request.clientId; // Получаем id клиента из заявки
+              if (clientId) {
+                const clientResponse = await axios.get(`http://localhost:7001/clients/${clientId}`, {
+                  headers: {
+                    Authorization: `Bearer ${token}`
+                  }
+                });
+                request.client = clientResponse.data; // Добавляем информацию о клиенте в объект заявки
+              }
+            }
+            console.log(this.requests)
+          } catch (error) {
+            console.error('Error fetching data:', error);
+          }
+        },
+
+        async getUsers() {
+          try {
+
+            // Получаем токен из Vuex store
+            const token = this.$store.getters.token;
+
+            // Используем токен в заголовке запроса
+            const response = await axios.get('http://localhost:7001/users', {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+            this.users = response.data;
+            this.getClients();
+          } catch (error) {
+            console.error('Error fetching data:', error);
+          }
+        },
+        async getClients() {
+          try {
+
+            // Получаем токен из Vuex store
+            const token = this.$store.getters.token;
+
+            // Используем токен в заголовке запроса
+            const response = await axios.get('http://localhost:7001/clients', {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+            this.clients = response.data;
+          } catch (error) {
+            console.error('Error fetching data:', error);
+          }
+        },
+      },
+
+      watch: {
+        // Следим за изменениями searchQueryRequests и вызываем searchRequests при каждом изменении
+        searchQueryRequests: {
+          handler(newValue) {
+            this.searchRequests();
+          },
+          immediate: true // Выполнить поиск сразу при загрузке компонента
+        },
+        searchQuery: {
+          handler(newValue) {
+            this.searchClients();
+          },
+          immediate: true // Выполнить поиск сразу при загрузке компонента
+        }
+      },
+      async created() {
+        await this.getClients();
+        this.filteredClients = this.clients;
+        this.getRequests();
+        this.getUsers();
+      },
+
+      computed: {
+        totalCost() {
+          return this.providedAdvances.reduce((total, item) => {
+            const price = parseFloat(item.advances.price);
+            return isNaN(price) ? total : total + price;
+          }, 0).toFixed(2);
+        }
+      },
+      destroyed() {
+        // Очищаем массивы после уничтожения компонента
+        this.UsedMaterials = [];
+        this.UsedEquipment = [];
+      },
+    };
+
+    const equipment = {
+      template:
+        `<div>
+          <div class="container">
+            <div class="mb-3">
+              <div class="mb-3">
+                <p class="h4 fw-light">Список имеющегося оборудования</p>   
+              </div>
+              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEquipments">
+                Добавить
+              </button>
+            </div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">№</th>
+                  <th scope="col">Название</th>
+                  <th scope="col">Цена (руб.)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in equipments" :key="item.id">
+                  <th scope="row">{{item.id}}</th>
+                  <td>{{item.name}}</td>
+                  <td>{{item.price}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+
+
+          <div class="modal fade" id="addEquipments" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addEquipmentsLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addEquipmentsLabel">Добавить</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form @submit.prevent="addEquipment">
+            <div class="modal-body">
+              <div class="input-group mb-3">
+                <span class="input-group-text" id="inputGroup-sizing-default">Название</span>
+                <input type="text" v-model="name" id="name" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+              </div>
+              <div class="input-group mb-3">
+                <span class="input-group-text" id="inputGroup-sizing-default">Цена</span>
+                <input type="number" v-model="price" id="price" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+              </div>
+            </div>
+          <div class="modal-footer">
+            <button type="submit"class="btn btn-primary">Добавить</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+          </div>
+        </form>
+        </div>
+      </div>
+    </div>
+        </div>
+        `,
+
+      data() {
+        return {
+          name: '',
+          price: null,
+          equipments: []
+        }
+      },
+      methods: {
+        getEquipments() {
+          axios.get('http://localhost:7001/equipment')
+            .then(response => {
+              // Обработка успешного ответа
+              this.equipments = response.data;
+              console.log('Полученные данные оборудования:', this.equipments);
+            })
+            .catch(error => {
+              // Обработка ошибки
+              console.error('Ошибка при получении данных оборудования:', error);
+            });
+        },
+        addEquipment() {
+          const data = {
+            name: this.name,
+            price: this.price
+          };
+
+          axios.post('http://localhost:7001/equipment', data)
+            .then(response => {
+              // Обработка успешного ответа
+              console.log('Оборудование успешно добавлено:', response.data);
+              // Обновление списка оборудования после добавления нового элемента
+              this.getEquipments();
+            })
+            .catch(error => {
+              // Обработка ошибки
+              console.error('Ошибка при добавлении оборудования:', error);
+            });
+        }
+
+      },
+      created() {
+        this.getEquipments();
+      }
+
+    };
+
+    const materials = {
+      template:
+        `<div>
+          <div class="container">
+            <div class="mb-3">
+                <div class="mb-3">
+                  <p class="h4 fw-light">Список имеющихся материалов</p>   
+                </div>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMaterials">
+                  Добавить
+                </button>
+            </div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">№</th>
+                  <th scope="col">Название</th>
+                  <th scope="col">Цена (руб.)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in materials" :key="item.id">
+                  <th scope="row">{{item.id}}</th>
+                  <td>{{item.name}}</td>
+                  <td>{{item.price}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="modal fade" id="addMaterials" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addMaterialsLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addMaterialsLabel">Добавить материал</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form @submit.prevent="addMaterial">
+            <div class="modal-body">
+              <div class="input-group mb-3">
+                <span class="input-group-text" id="inputGroup-sizing-default">Название</span>
+                <input type="text" v-model="name" id="name" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+              </div>
+              <div class="input-group mb-3">
+                <span class="input-group-text" id="inputGroup-sizing-default">Цена</span>
+                <input type="number" v-model="price" id="price" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+              </div>
+            </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            <button type="button" class="btn btn-primary" type="submit">Добавить</button>
+          </div>
+        </form>
+        </div>
+      </div>
+    </div>
+
+        </div>
+        `,
+
+      data() {
+        return {
+          name: '',
+          price: null,
+          materials: []
+        }
+      },
+      methods: {
+        getMaterials() {
+          axios.get('http://localhost:7001/materials')
+            .then(response => {
+              // Обработка успешного ответа
+              this.materials = response.data;
+              console.log('Полученные данные об материалах:', this.materials);
+            })
+            .catch(error => {
+              // Обработка ошибки
+              console.error('Ошибка при получении данных об материалах:', error);
+            });
+        },
+        addMaterial() {
+          const data = {
+            name: this.name,
+            price: this.price
+          };
+
+          axios.post('http://localhost:7001/materials', data)
+            .then(response => {
+              // Обработка успешного ответа
+              console.log('Материал успешно добавлен:', response.data);
+              // Обновление списка оборудования после добавления нового элемента
+              this.getMaterials();
+            })
+            .catch(error => {
+              // Обработка ошибки
+              console.error('Ошибка при добавлении оборудования:', error);
+            });
+        },
+      },
+      created() {
+        this.getMaterials();
+      }
+
+    };
+    const advances = {
+      template:
+        `<div>
+          <div class="container">         
+            <div class="mb-3">
+              <div class="mb-3">
+                <p class="h4 fw-light">Список предоставляющихся усгу</p>   
+              </div>
+              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAdvances">
+                Добавить
+              </button>
+            </div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">№</th>
+                  <th scope="col">Название</th>
+                  <th scope="col">Цена (руб.)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in advances" :key="item.id">
+                  <th scope="row">{{item.id}}</th>
+                  <td>{{item.name}}</td>
+                  <td>{{item.price}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="modal fade" id="addAdvances" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addAdvancesLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addAdvancesLabel">Добавить материал</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form @submit.prevent="addAdvances">
+            <div class="modal-body">
+              <div class="input-group mb-3">
+                <span class="input-group-text" id="inputGroup-sizing-default">Название</span>
+                <input type="text" v-model="name" id="name" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+              </div>
+              <div class="input-group mb-3">
+                <span class="input-group-text" id="inputGroup-sizing-default">Цена</span>
+                <input type="number" v-model="price" id="price" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+              </div>
+            </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            <button class="btn btn-primary" type="submit">Добавить</button>
+          </div>
+        </form>
+        </div>
+      </div>
+    </div>
+
+        </div>
+        `,
+
+      data() {
+        return {
+          name: '',
+          price: null,
+          advances: []
+        }
+      },
+      methods: {
+        getAdvances() {
+          axios.get('http://localhost:7001/advances')
+            .then(response => {
+              // Обработка успешного ответа
+              this.advances = response.data;
+              console.log('Полученные данные об материалах:', this.advances);
+            })
+            .catch(error => {
+              // Обработка ошибки
+              console.error('Ошибка при получении данных об материалах:', error);
+            });
+        },
+        addAdvances() {
+          const data = {
+            name: this.name,
+            price: this.price
+          };
+
+          axios.post('http://localhost:7001/advances', data)
+            .then(response => {
+              // Обработка успешного ответа
+              alert('Услуга успешно добавлена:', response.data);
+              // Обновление списка оборудования после добавления нового элемента
+              this.getAdvances();
+            })
+            .catch(error => {
+              // Обработка ошибки
+              console.error('Ошибка при добавлении услуги:', error);
+            });
+        },
+      },
+      created() {
+        this.getAdvances();
+      }
+
+    };
+    const store = new Vuex.Store({
+      mutations: {
+        setToken(state, token) {
+          state.token = token;
+          localStorage.setItem('token', token);
+        },
+      },
+      state: {
+        token: localStorage.getItem('token') || null,
+      },
+      getters: {
+        isAuthenticated: state => !!state.token,
+        token: state => state.token
+      },
+      actions: {
+        initializeStore({ commit }) {
+          const token = localStorage.getItem('token');
+          if (token) {
+            commit('setToken', token);
+          }
+        },
+      },
+
+    });
+
+    store.dispatch('initializeStore');
+
+    // Определение маршрутов
+    const routes = [
+      { path: '/', component: loginForm, name: 'login-form', meta: { title: 'Вход' } },
+      {
+        path: '/main-app',
+        component: mainApp,
+        name: 'mail-app',
+        meta: {
+          title: 'Основное приложение'
+        },
+        children: [
+          { path: 'my-profile', component: myProfile, meta: { title: 'Мой профиль' } },
+          { path: 'send-request', component: sendRequest, meta: { title: 'Создать заявку' } },
+          { path: 'completed-request', component: completedRequest, meta: { title: 'Завершенные заявки' } },
+          { path: 'equipment', component: equipment, meta: { title: 'Оборудование' } },
+          { path: 'materials', component: materials, meta: { title: 'Материалы' } },
+          { path: 'advances', component: advances, meta: { title: 'Услуги' } },
+        ],
+        beforeEnter: (to, from, next) => {
+          if (store.state.token) {
+            next();
+          } else {
+            next('/');
+          }
+        }
+      },
+
+
+    ];
+    // Создание роутера
+    const router = new VueRouter({
+      routes
+    });
+
+    router.afterEach((to, from) => {
+      // Обновляем заголовок страницы на основе текущего маршрута
+      document.title = to.meta.title || 'Client System';
+    });
+    // Создание и монтирование корневого экземпляра Vue
+    new Vue({
+      el: '#app',
+      components: {
+        loginForm, myProfile, sendRequest, completedRequest, mainApp
+      },
+      router,
+      store,
+      methods: {
+        goTo(routeName) {
+          this.$router.push({ name: routeName });
+        }
+      }
+    }).$mount('#app');
+
+
+    var toastTrigger = document.getElementById('liveToastBtn')
+    var toastLiveExample = document.getElementById('liveToast')
+    if (toastTrigger) {
+      toastTrigger.addEventListener('click', function () {
+        var toast = new bootstrap.Toast(toastLiveExample)
+        toast.show()
+      })
+    }
+
+
+  </script>
+</body>
+
+</html>
