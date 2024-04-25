@@ -3,7 +3,7 @@ import { Column, Model, Table, ForeignKey, BelongsTo, HasMany } from 'sequelize-
 import { ClientPhys } from 'src/client-phys/client-phys.model';
 import { ClientUr } from 'src/client-ur/client-ur.model';
 
-@Table({ tableName: 'Clients', createdAt: false, updatedAt: false }) // Исправленное указание названия таблицы
+@Table({ tableName: 'Clients', createdAt: false, updatedAt: false })
 export class Clients extends Model<Clients> {
   @Column({
     autoIncrement: true,
